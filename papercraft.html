@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse all GHOSTPER anime papercraft templates. Search by character or anime name.">
+    <meta name="theme-color" content="#000000">
+    <title>Papercrafts - GHOSTPER</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/logo.png" type="image/png">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.png" alt="GHOSTPER Logo" class="logo-img">
+                <span>GHOSTPER</span>
+            </div>
+            
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="papercrafts.html" class="nav-link active">Papercrafts</a></li>
+                <li><a href="about.html" class="nav-link">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Anime Papercrafts</h1>
+            <p>Discover and download our collection of anime papercraft templates</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="papercrafts-container">
+            <!-- Sidebar Filters -->
+            <aside class="sidebar">
+                <div class="filter-section">
+                    <h3>Search</h3>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="Search by character or anime..."
+                        aria-label="Search papercrafts"
+                    >
+                </div>
+
+                <div class="filter-section">
+                    <h3>Difficulty</h3>
+                    <div class="filter-options" id="filterButtons">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="easy">Easy</button>
+                        <button class="filter-btn" data-filter="medium">Medium</button>
+                        <button class="filter-btn" data-filter="hard">Hard</button>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Results</h3>
+                    <p id="resultCount" class="result-count">Showing all papercrafts</p>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Ad Space -->
+                <div class="ad-space" id="ad-papercrafts">
+                    <!-- Ad Space -->
+                </div>
+
+                <!-- Papercrafts Grid -->
+                <div class="papercrafts-grid" id="papercraftsGrid">
+                    <!-- Cards will be populated by JavaScript -->
+                </div>
+
+                <!-- No Results Message -->
+                <div class="no-results" id="noResults" style="display: none;">
+                    <p>No papercrafts found matching your search.</p>
+                    <button onclick="resetFilters()" class="btn btn-secondary">Clear Filters</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>GHOSTPER</h4>
+                    <p>Free Anime Papercrafts</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="papercrafts.html">Papercrafts</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <div class="social-links">
+                        <a href="#" title="GitHub" aria-label="GitHub">GitHub</a>
+                        <a href="#" title="Discord" aria-label="Discord">Discord</a>
+                        <a href="#" title="Twitter" aria-label="Twitter">Twitter</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 GHOSTPER. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
