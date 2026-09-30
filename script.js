@@ -75,6 +75,15 @@ const papercraftsData = [
         description: 'The bald hero with unmatched power. Simple yet iconic, perfect for beginning builders.',
         imagePath: 'assets/papercrafts/saitama/preview.jpg',
         pdfPath: 'assets/papercrafts/saitama/saitama-template.pdf'
+    },
+    {
+        id: 9,
+        name: 'Madara Uchiha',
+        anime: 'Naruto',
+        difficulty: 'hard',
+        description: 'The legendary Uchiha clan leader with his signature Sharingan and flowing black hair. An advanced build featuring intricate details and his iconic dark red outfit.',
+        imagePath: 'assets/papercrafts/madara/preview.jpg',
+        pdfPath: 'assets/papercrafts/madara/madara-template.pdf'
     }
 ];
 
@@ -163,8 +172,10 @@ function renderFeaturedGrid() {
     const featuredGrid = document.getElementById('featuredGrid');
     if (!featuredGrid) return;
     
-    // Show first 4 papercrafts as featured
-    const featured = papercraftsData.slice(0, 4);
+    // Show featured papercrafts: Naruto, Gojo, Madara, Luffy (mix of easy/medium/hard)
+    const featuredIds = [1, 5, 9, 6]; // Naruto, Gojo, Madara, Luffy
+    const featured = papercraftsData.filter(p => featuredIds.includes(p.id))
+                                    .sort((a, b) => featuredIds.indexOf(a.id) - featuredIds.indexOf(b.id));
     
     featured.forEach(papercraft => {
         const card = createPapercraftCard(papercraft, true);
@@ -302,7 +313,18 @@ function initDetailPage() {
     
     // Set preview image
     const previewImage = document.getElementById('previewImage');
-    previewImage.innerHTML = generatePlaceholderImage(papercraft.name, papercraft.anime);
+    const img = document.createElement('img');
+    img.src = papercraft.imagePath;
+    img.alt = papercraft.name;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.onerror = () => {
+        // Fallback to placeholder if image fails to load
+        previewImage.innerHTML = generatePlaceholderImage(papercraft.name, papercraft.anime);
+    };
+    previewImage.innerHTML = '';
+    previewImage.appendChild(img);
     
     // Set download button
     const downloadBtn = document.getElementById('downloadBtn');
@@ -379,4 +401,3 @@ document.addEventListener('click', function() {
     // Remove keyboard focus indicator on mouse click
     document.body.classList.remove('keyboard-focused');
 });
-  
