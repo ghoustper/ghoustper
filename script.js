@@ -1,403 +1,482 @@
-// ============================================
-// GHOSTPER - Main JavaScript
-// ============================================
+/* ==========================================================
+   GHOSTPER - script.js
+   1) SITE      : site ayarları (linkler, isim)
+   2) PAPERCRAFTS: şablon listesi (yeni şablon buraya eklenir)
+   3) Geri kalanı: sayfaları çizen kod (dokunmana gerek yok)
+   ========================================================== */
 
-// ============ Data ============
-const papercraftsData = [
+/* ----------------------------------------------------------
+   1) SITE AYARLARI
+   Boş bıraktığın linkler sitede görünmez.
+   ---------------------------------------------------------- */
+const SITE = {
+    name: 'GHOSTPER',
+    tagline: 'Free anime papercraft templates. Download, print, cut, fold and build.',
+    github: 'https://github.com/ghoustper/ghoustper',
+    discord: '',
+    instagram: '',
+    youtube: ''
+};
+
+/* ----------------------------------------------------------
+   2) PAPERCRAFT LİSTESİ
+
+   Yeni şablon eklemek için bir blok kopyala ve doldur:
+     slug        : benzersiz, küçük harf, boşluk yerine tire (URL'de kullanılır)
+     difficulty  : 'easy' | 'medium' | 'hard'
+     added       : eklenme tarihi (YYYY-MM-DD), "Newest" sıralaması için
+     featured    : true olursa ana sayfada görünür
+     pdf         : PDF dosya adı (repo ana klasöründe). Yoksa '' bırak -> "PDF coming soon" görünür
+     image       : önizleme görseli dosya adı (ör. 'madara.jpg'). Yoksa '' bırak -> otomatik çizim görünür
+   ---------------------------------------------------------- */
+const PAPERCRAFTS = [
     {
-        id: 1,
-        name: 'Naruto Uzumaki',
-        anime: 'Naruto',
-        difficulty: 'medium',
-        description: 'The cheerful ninja and main character from Naruto. This template captures his iconic orange suit and headband perfectly.',
-        imagePath: 'assets/papercrafts/naruto/preview.jpg',
-        pdfPath: 'assets/papercrafts/naruto/naruto-template.pdf'
-    },
-    {
-        id: 2,
-        name: 'Sasuke Uchiha',
-        anime: 'Naruto',
-        difficulty: 'hard',
-        description: 'The talented and serious ninja with the Sharingan. A challenging build featuring detailed facial features and his distinctive outfit.',
-        imagePath: 'assets/papercrafts/sasuke/preview.jpg',
-        pdfPath: 'assets/papercrafts/sasuke/sasuke-template.pdf'
-    },
-    {
-        id: 3,
-        name: 'Ichigo Kurosaki',
-        anime: 'Bleach',
-        difficulty: 'medium',
-        description: 'The Soul Reaper protector with his signature orange hair and black coat. Perfect for intermediate builders.',
-        imagePath: 'assets/papercrafts/ichigo/preview.jpg',
-        pdfPath: 'assets/papercrafts/ichigo/ichigo-template.pdf'
-    },
-    {
-        id: 4,
-        name: 'Goku',
-        anime: 'Dragon Ball',
-        difficulty: 'easy',
-        description: 'The legendary Saiyan warrior. A great starting project with its simple and iconic design.',
-        imagePath: 'assets/papercrafts/goku/preview.jpg',
-        pdfPath: 'assets/papercrafts/goku/goku-template.pdf'
-    },
-    {
-        id: 5,
-        name: 'Gojo Satoru',
-        anime: 'Jujutsu Kaisen',
-        difficulty: 'hard',
-        description: 'The powerful sorcerer with his infinity ability. This complex design is for advanced papercraft builders.',
-        imagePath: 'assets/papercrafts/gojo/preview.jpg',
-        pdfPath: 'assets/papercrafts/gojo/gojo-template.pdf'
-    },
-    {
-        id: 6,
-        name: 'Luffy',
-        anime: 'One Piece',
-        difficulty: 'medium',
-        description: 'The rubber pirate captain with his signature straw hat. A fun and recognizable build for all levels.',
-        imagePath: 'assets/papercrafts/luffy/preview.jpg',
-        pdfPath: 'assets/papercrafts/luffy/luffy-template.pdf'
-    },
-    {
-        id: 7,
-        name: 'Tanjiro Kamado',
-        anime: 'Demon Slayer',
-        difficulty: 'easy',
-        description: 'The demon slayer with his checkered haori. A beginner-friendly template with striking colors.',
-        imagePath: 'assets/papercrafts/tanjiro/preview.jpg',
-        pdfPath: 'assets/papercrafts/tanjiro/tanjiro-template.pdf'
-    },
-    {
-        id: 8,
-        name: 'Saitama',
-        anime: 'One Punch Man',
-        difficulty: 'easy',
-        description: 'The bald hero with unmatched power. Simple yet iconic, perfect for beginning builders.',
-        imagePath: 'assets/papercrafts/saitama/preview.jpg',
-        pdfPath: 'assets/papercrafts/saitama/saitama-template.pdf'
-    },
-    {
-        id: 9,
+        slug: 'madara-uchiha',
         name: 'Madara Uchiha',
         anime: 'Naruto',
         difficulty: 'hard',
-        description: 'The legendary Uchiha clan leader with his signature Sharingan and flowing black hair. An advanced build featuring intricate details and his iconic dark red outfit.',
-        imagePath: 'assets/papercrafts/madara/preview.jpg',
-        pdfPath: 'assets/papercrafts/madara/madara-template.pdf'
+        added: '2026-09-30',
+        featured: true,
+        description: 'The legendary Uchiha clan leader with his spiky black hair and stern Sharingan stare. A detailed build for experienced folders.',
+        pdf: 'madara-build-guide.pdf',
+        image: ''
+    },
+    {
+        slug: 'naruto-uzumaki',
+        name: 'Naruto Uzumaki',
+        anime: 'Naruto',
+        difficulty: 'medium',
+        added: '2026-09-28',
+        featured: true,
+        description: 'The cheerful ninja with his orange jumpsuit and forehead protector. A fun mid-level build with bold colors.',
+        pdf: '',
+        image: ''
+    },
+    {
+        slug: 'sasuke-uchiha',
+        name: 'Sasuke Uchiha',
+        anime: 'Naruto',
+        difficulty: 'hard',
+        added: '2026-09-28',
+        featured: false,
+        description: 'The talented ninja with the Sharingan. Fine facial details make this a challenge worth the effort.',
+        pdf: '',
+        image: ''
+    },
+    {
+        slug: 'ichigo-kurosaki',
+        name: 'Ichigo Kurosaki',
+        anime: 'Bleach',
+        difficulty: 'medium',
+        added: '2026-09-28',
+        featured: false,
+        description: 'The Soul Reaper with bright orange hair and a black shihakusho. Great for intermediate builders.',
+        pdf: '',
+        image: ''
+    },
+    {
+        slug: 'goku',
+        name: 'Goku',
+        anime: 'Dragon Ball',
+        difficulty: 'easy',
+        added: '2026-09-28',
+        featured: true,
+        description: 'The legendary Saiyan warrior. Simple shapes and an iconic look make this a perfect first project.',
+        pdf: '',
+        image: ''
+    },
+    {
+        slug: 'gojo-satoru',
+        name: 'Gojo Satoru',
+        anime: 'Jujutsu Kaisen',
+        difficulty: 'hard',
+        added: '2026-09-28',
+        featured: true,
+        description: 'The strongest sorcerer with white hair and a blindfold. A complex design for advanced builders.',
+        pdf: '',
+        image: ''
+    },
+    {
+        slug: 'luffy',
+        name: 'Monkey D. Luffy',
+        anime: 'One Piece',
+        difficulty: 'medium',
+        added: '2026-09-28',
+        featured: false,
+        description: 'The rubber-bodied pirate captain and his signature straw hat. Recognizable and rewarding at any skill level.',
+        pdf: '',
+        image: ''
+    },
+    {
+        slug: 'tanjiro-kamado',
+        name: 'Tanjiro Kamado',
+        anime: 'Demon Slayer',
+        difficulty: 'easy',
+        added: '2026-09-28',
+        featured: false,
+        description: 'The demon slayer in his green and black checkered haori. Beginner friendly with striking patterns.',
+        pdf: '',
+        image: ''
+    },
+    {
+        slug: 'saitama',
+        name: 'Saitama',
+        anime: 'One Punch Man',
+        difficulty: 'easy',
+        added: '2026-09-28',
+        featured: false,
+        description: 'The hero who wins with one punch. Minimal details and clean shapes, ideal for beginners.',
+        pdf: '',
+        image: ''
     }
 ];
 
-// ============ Navigation ============
-function initNavigation() {
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.getElementById('navMenu');
+/* ==========================================================
+   3) KOD (buradan aşağısını değiştirmene gerek yok)
+   ========================================================== */
+(function () {
+    'use strict';
 
-    if (hamburger) {
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
+    /* ---------- Helpers ---------- */
+    const $ = (sel, root) => (root || document).querySelector(sel);
+    const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 
-        // Close menu when link is clicked
-        const navLinks = navMenu.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
-            });
-        });
-    }
-}
+    const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ESC[c]);
 
-// ============ Generate Placeholder Image ============
-function generatePlaceholderImage(character, anime) {
-    const colors = [
-        { bg: '#9d4edd', text: '#ffffff' },
-        { bg: '#7b68ee', text: '#ffffff' },
-        { bg: '#1a1a2e', text: '#00d084' },
-        { bg: '#16213e', text: '#e0e0e0' }
-    ];
-    
-    const colorIndex = Math.abs(character.charCodeAt(0)) % colors.length;
-    const color = colors[colorIndex];
-
-    return `
-        <div style="
-            width: 100%; 
-            height: 100%; 
-            background-color: ${color.bg}; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px;
-            text-align: center;
-            color: ${color.text};
-        ">
-            <div style="font-size: 3rem; margin-bottom: 10px;">📄</div>
-            <div style="font-weight: 700; margin-bottom: 5px;">${character}</div>
-            <div style="font-size: 0.85rem; opacity: 0.8;">${anime}</div>
-        </div>
-    `;
-}
-
-// ============ Create Papercraft Card ============
-function createPapercraftCard(papercraft, isFeatured = false) {
-    const card = document.createElement('div');
-    card.className = 'papercraft-card';
-    
-    const difficultyClass = papercraft.difficulty.toLowerCase();
-    
-    card.innerHTML = `
-        <div class="card-image placeholder">
-            ${generatePlaceholderImage(papercraft.name, papercraft.anime)}
-        </div>
-        <div class="card-content">
-            <div class="card-title">${papercraft.name}</div>
-            <div class="card-anime">${papercraft.anime}</div>
-            <div class="card-difficulty ${difficultyClass}">
-                ${papercraft.difficulty.charAt(0).toUpperCase() + papercraft.difficulty.slice(1)}
-            </div>
-            <button class="card-button" onclick="viewPapercraft(${papercraft.id})">
-                View Template
-            </button>
-        </div>
-    `;
-    
-    return card;
-}
-
-// ============ Render Featured Grid (Home Page) ============
-function renderFeaturedGrid() {
-    const featuredGrid = document.getElementById('featuredGrid');
-    if (!featuredGrid) return;
-    
-    // Show featured papercrafts: Naruto, Gojo, Madara, Luffy (mix of easy/medium/hard)
-    const featuredIds = [1, 5, 9, 6]; // Naruto, Gojo, Madara, Luffy
-    const featured = papercraftsData.filter(p => featuredIds.includes(p.id))
-                                    .sort((a, b) => featuredIds.indexOf(a.id) - featuredIds.indexOf(b.id));
-    
-    featured.forEach(papercraft => {
-        const card = createPapercraftCard(papercraft, true);
-        featuredGrid.appendChild(card);
-    });
-}
-
-// ============ Render All Papercrafts (Papercrafts Page) ============
-function renderAllPapercrafts(filter = 'all', searchTerm = '') {
-    const grid = document.getElementById('papercraftsGrid');
-    const noResults = document.getElementById('noResults');
-    
-    if (!grid) return;
-    
-    // Clear grid
-    grid.innerHTML = '';
-    
-    // Filter papercrafts
-    let filtered = papercraftsData.filter(papercraft => {
-        const matchDifficulty = filter === 'all' || papercraft.difficulty === filter;
-        const matchSearch = searchTerm === '' || 
-                          papercraft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          papercraft.anime.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        return matchDifficulty && matchSearch;
-    });
-    
-    // Update result count
-    const resultCount = document.getElementById('resultCount');
-    if (resultCount) {
-        const count = filtered.length;
-        resultCount.textContent = `Showing ${count} papercraft${count !== 1 ? 's' : ''}`;
-    }
-    
-    // Show no results message
-    if (filtered.length === 0) {
-        grid.style.display = 'none';
-        noResults.style.display = 'block';
-        return;
-    }
-    
-    grid.style.display = 'grid';
-    noResults.style.display = 'none';
-    
-    // Render cards
-    filtered.forEach(papercraft => {
-        const card = createPapercraftCard(papercraft);
-        grid.appendChild(card);
-    });
-}
-
-// ============ Initialize Filtering (Papercrafts Page) ============
-function initFiltering() {
-    const filterButtons = document.getElementById('filterButtons');
-    const searchInput = document.getElementById('searchInput');
-    
-    if (!filterButtons || !searchInput) return;
-    
-    let currentFilter = 'all';
-    let currentSearch = '';
-    
-    // Filter button clicks
-    filterButtons.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Update active state
-            filterButtons.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            currentFilter = btn.dataset.filter;
-            renderAllPapercrafts(currentFilter, currentSearch);
-        });
-    });
-    
-    // Search input
-    searchInput.addEventListener('input', (e) => {
-        currentSearch = e.target.value;
-        renderAllPapercrafts(currentFilter, currentSearch);
-    });
-    
-    // Initial render
-    renderAllPapercrafts('all', '');
-}
-
-// ============ Reset Filters ============
-function resetFilters() {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.value = '';
-    }
-    
-    const filterButtons = document.getElementById('filterButtons');
-    if (filterButtons) {
-        filterButtons.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        filterButtons.querySelector('[data-filter="all"]').classList.add('active');
-    }
-    
-    renderAllPapercrafts('all', '');
-}
-
-// ============ View Papercraft Detail ============
-function viewPapercraft(papercraftId) {
-    // Store selected papercraft ID in session storage
-    sessionStorage.setItem('selectedPapercraftId', papercraftId);
-    
-    // Redirect to detail page
-    window.location.href = 'detail.html';
-}
-
-// ============ Initialize Detail Page ============
-function initDetailPage() {
-    // Get selected papercraft ID
-    const papercraftId = sessionStorage.getItem('selectedPapercraftId');
-    
-    if (!papercraftId) {
-        window.location.href = 'papercrafts.html';
-        return;
-    }
-    
-    // Find papercraft
-    const papercraft = papercraftsData.find(p => p.id === parseInt(papercraftId));
-    
-    if (!papercraft) {
-        window.location.href = 'papercrafts.html';
-        return;
-    }
-    
-    // Update page content
-    document.title = `${papercraft.name} - GHOSTPER`;
-    document.getElementById('breadcrumbName').textContent = papercraft.name;
-    document.getElementById('detailName').textContent = papercraft.name;
-    document.getElementById('detailAnime').textContent = papercraft.anime;
-    document.getElementById('detailDifficulty').textContent = 
-        papercraft.difficulty.charAt(0).toUpperCase() + papercraft.difficulty.slice(1);
-    document.getElementById('detailDescription').textContent = papercraft.description;
-    
-    // Set preview image
-    const previewImage = document.getElementById('previewImage');
-    const img = document.createElement('img');
-    img.src = papercraft.imagePath;
-    img.alt = papercraft.name;
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'cover';
-    img.onerror = () => {
-        // Fallback to placeholder if image fails to load
-        previewImage.innerHTML = generatePlaceholderImage(papercraft.name, papercraft.anime);
+    const DIFFICULTY = {
+        easy: { label: 'Easy', level: 1 },
+        medium: { label: 'Medium', level: 2 },
+        hard: { label: 'Hard', level: 3 }
     };
-    previewImage.innerHTML = '';
-    previewImage.appendChild(img);
-    
-    // Set download button
-    const downloadBtn = document.getElementById('downloadBtn');
-    downloadBtn.href = papercraft.pdfPath;
-    downloadBtn.download = `${papercraft.name.toLowerCase().replace(/\s+/g, '-')}-template.pdf`;
-    
-    // Load related papercrafts
-    const related = papercraftsData
-        .filter(p => p.anime === papercraft.anime && p.id !== papercraft.id)
-        .slice(0, 3);
-    
-    const relatedGrid = document.getElementById('relatedGrid');
-    related.forEach(p => {
-        const card = createPapercraftCard(p);
-        relatedGrid.appendChild(card);
-    });
-}
 
-// ============ Initialize Page ============
-function initPage() {
-    // Always initialize navigation
-    initNavigation();
-    
-    // Check which page we're on
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    
-    if (currentPage === 'index.html' || currentPage === '') {
-        // Home page
-        renderFeaturedGrid();
-    } else if (currentPage === 'papercrafts.html') {
-        // Papercrafts page
-        initFiltering();
-    } else if (currentPage === 'detail.html') {
-        // Detail page
-        initDetailPage();
+    const findBySlug = (slug) => PAPERCRAFTS.find((p) => p.slug === slug);
+    const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+
+    function hashHue(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+        return h % 360;
     }
-}
 
-// ============ DOM Ready ============
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPage);
-} else {
-    initPage();
-}
+    function initials(name) {
+        return name
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((w) => w[0].toUpperCase())
+            .join('');
+    }
 
-// ============ Smooth Page Transitions ============
-window.addEventListener('beforeunload', function() {
-    // Add fade out animation if needed
-});
+    /* ---------- Reusable pieces ---------- */
+    function difficultyBadge(key) {
+        const d = DIFFICULTY[key] || DIFFICULTY.medium;
+        const bars = [1, 2, 3].map((n) => '<i class="' + (n <= d.level ? 'on' : '') + '"></i>').join('');
+        return (
+            '<span class="diff diff--' + esc(key) + '">' +
+            '<span class="diff__bars" aria-hidden="true">' + bars + '</span>' +
+            '<span>' + d.label + '</span></span>'
+        );
+    }
 
-// ============ Keyboard Navigation ============
-document.addEventListener('keydown', function(event) {
-    // Close mobile menu on ESC
-    if (event.key === 'Escape') {
-        const hamburger = document.getElementById('hamburger');
-        const navMenu = document.getElementById('navMenu');
-        
-        if (hamburger && navMenu) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
+    /* Otomatik çizilen önizleme: küçük bir kutu açılımı (papercraft net) */
+    function placeholderSVG(p) {
+        const color = 'hsl(' + hashHue(p.anime) + ' 60% 74%)';
+        return (
+            '<svg class="art" viewBox="24 16 152 196" role="img" aria-label="Preview for ' + esc(p.name) + '">' +
+            '<path d="M80 30H120V70H160V110H120V190H80V110H40V70H80Z" fill="' + color + '" fill-opacity="0.07" stroke="' + color + '" stroke-width="1.6" stroke-linejoin="round"/>' +
+            '<path d="M80 70H120M80 110H120M80 150H120M80 70V110M120 70V110" fill="none" stroke="' + color + '" stroke-opacity="0.55" stroke-width="1.2" stroke-dasharray="4 4"/>' +
+            '<text x="100" y="91" text-anchor="middle" dominant-baseline="middle" font-family="Bricolage Grotesque, Segoe UI, sans-serif" font-weight="700" font-size="20" fill="' + color + '">' + esc(initials(p.name)) + '</text>' +
+            '</svg>'
+        );
+    }
+
+    function artHTML(p) {
+        if (p.image) {
+            return '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + ' papercraft preview" loading="lazy" data-slug="' + esc(p.slug) + '">';
+        }
+        return placeholderSVG(p);
+    }
+
+    /* Görsel yüklenmezse otomatik çizime dön */
+    function hydrateArt(root) {
+        $$('img[data-slug]', root).forEach((img) => {
+            img.addEventListener('error', () => {
+                const p = findBySlug(img.dataset.slug);
+                if (p) img.replaceWith(htmlToNode(placeholderSVG(p)));
+            }, { once: true });
+        });
+    }
+
+    function htmlToNode(html) {
+        const t = document.createElement('template');
+        t.innerHTML = html.trim();
+        return t.content.firstChild;
+    }
+
+    function cardHTML(p) {
+        return (
+            '<a class="card" href="detail.html?p=' + encodeURIComponent(p.slug) + '">' +
+            '<div class="card__art">' + artHTML(p) +
+            (p.pdf ? '' : '<span class="card__tag">PDF soon</span>') +
+            '</div>' +
+            '<div class="card__body">' +
+            '<p class="card__anime">' + esc(p.anime) + '</p>' +
+            '<h3 class="card__title">' + esc(p.name) + '</h3>' +
+            '<div class="card__foot">' + difficultyBadge(p.difficulty) + '<span class="card__cta">View template</span></div>' +
+            '</div></a>'
+        );
+    }
+
+    function renderCards(container, list) {
+        container.innerHTML = list.map(cardHTML).join('');
+        hydrateArt(container);
+    }
+
+    /* ---------- Header & Footer ---------- */
+    function renderHeader() {
+        const host = $('#site-header');
+        if (!host) return;
+        const page = document.body.dataset.page;
+        const cur = (name) => (page === name ? ' aria-current="page"' : '');
+
+        host.className = 'site-header';
+        host.innerHTML =
+            '<div class="wrap header__in">' +
+            '<a class="brand" href="index.html" aria-label="' + esc(SITE.name) + ' home">' +
+            '<img class="brand__logo" src="logo.png" alt="" width="36" height="36">' +
+            '<span>' + esc(SITE.name) + '</span></a>' +
+            '<button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span><span></span></button>' +
+            '<nav class="nav" id="site-nav" aria-label="Main">' +
+            '<a href="index.html"' + cur('home') + '>Home</a>' +
+            '<a href="papercraft.html"' + cur('list') + '>Papercrafts</a>' +
+            '<a href="index.html#categories">Categories</a>' +
+            '<a href="about.html"' + cur('about') + '>About</a>' +
+            '</nav></div>';
+
+        const logo = $('.brand__logo', host);
+        logo.addEventListener('error', () => logo.remove(), { once: true });
+
+        const btn = $('.menu-btn', host);
+        const nav = $('#site-nav', host);
+        const setOpen = (open) => {
+            btn.setAttribute('aria-expanded', String(open));
+            btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+            nav.dataset.open = String(open);
+        };
+        btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
+        $$('a', nav).forEach((a) => a.addEventListener('click', () => setOpen(false)));
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+        document.addEventListener('click', (e) => { if (!host.contains(e.target)) setOpen(false); });
+    }
+
+    function renderFooter() {
+        const host = $('#site-footer');
+        if (!host) return;
+
+        const social = [];
+        if (SITE.github) social.push(['GitHub', SITE.github]);
+        if (SITE.discord) social.push(['Discord', SITE.discord]);
+        if (SITE.instagram) social.push(['Instagram', SITE.instagram]);
+        if (SITE.youtube) social.push(['YouTube', SITE.youtube]);
+        const socialHTML = social
+            .map((s) => '<li><a href="' + esc(s[1]) + '" target="_blank" rel="noopener noreferrer">' + s[0] + '</a></li>')
+            .join('');
+
+        host.className = 'site-footer';
+        host.innerHTML =
+            '<div class="wrap">' +
+            '<div class="footer__grid">' +
+            '<div class="footer__brand"><a class="brand" href="index.html">' +
+            '<img class="brand__logo" src="logo.png" alt="" width="36" height="36"><span>' + esc(SITE.name) + '</span></a>' +
+            '<p>' + esc(SITE.tagline) + '</p></div>' +
+            '<div class="footer__col"><h4>Explore</h4><ul>' +
+            '<li><a href="index.html">Home</a></li>' +
+            '<li><a href="papercraft.html">Papercrafts</a></li>' +
+            '<li><a href="index.html#categories">Categories</a></li>' +
+            '<li><a href="about.html">About</a></li></ul></div>' +
+            (socialHTML ? '<div class="footer__col"><h4>Community</h4><ul>' + socialHTML + '</ul></div>' : '') +
+            '</div>' +
+            '<div class="footer__bottom">' +
+            '<span>&copy; ' + new Date().getFullYear() + ' ' + esc(SITE.name) + '</span>' +
+            '<span>Fan-made templates. All characters belong to their respective owners.</span>' +
+            '</div></div>';
+
+        const logo = $('.brand__logo', host);
+        if (logo) logo.addEventListener('error', () => logo.remove(), { once: true });
+    }
+
+    /* ---------- Home ---------- */
+    function initHome() {
+        const featured = $('#featuredGrid');
+        if (featured) {
+            const list = PAPERCRAFTS.filter((p) => p.featured).slice(0, 4);
+            renderCards(featured, list.length ? list : PAPERCRAFTS.slice(0, 4));
+        }
+
+        const cats = $('#catGrid');
+        if (cats) {
+            const counts = {};
+            PAPERCRAFTS.forEach((p) => { counts[p.anime] = (counts[p.anime] || 0) + 1; });
+            cats.innerHTML = Object.keys(counts)
+                .sort((a, b) => a.localeCompare(b))
+                .map((name) =>
+                    '<a class="cat" href="papercraft.html?anime=' + encodeURIComponent(name) + '">' +
+                    '<strong>' + esc(name) + '</strong><span>' + plural(counts[name], 'template') + '</span></a>'
+                )
+                .join('');
         }
     }
-});
 
-// ============ Accessibility: Focus Management ============
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Tab') {
-        // Add visual focus indicator
-        document.body.classList.add('keyboard-focused');
+    /* ---------- Papercraft list ---------- */
+    function initList() {
+        const grid = $('#grid');
+        if (!grid) return;
+
+        const qEl = $('#q');
+        const animeEl = $('#anime');
+        const sortEl = $('#sort');
+        const chips = $$('#diffChips .chip');
+        const countEl = $('#count');
+        const emptyEl = $('#empty');
+        const resetBtn = $('#reset');
+
+        /* Anime seçeneklerini doldur */
+        Array.from(new Set(PAPERCRAFTS.map((p) => p.anime)))
+            .sort((a, b) => a.localeCompare(b))
+            .forEach((name) => {
+                const o = document.createElement('option');
+                o.value = name;
+                o.textContent = name;
+                animeEl.appendChild(o);
+            });
+
+        /* URL'den başlangıç durumu */
+        const params = new URLSearchParams(window.location.search);
+        const state = {
+            q: params.get('q') || '',
+            d: DIFFICULTY[params.get('d')] ? params.get('d') : 'all',
+            anime: params.get('anime') || 'all',
+            sort: ['new', 'az', 'easy', 'hard'].includes(params.get('sort')) ? params.get('sort') : 'new'
+        };
+        if (state.anime !== 'all' && !PAPERCRAFTS.some((p) => p.anime === state.anime)) state.anime = 'all';
+
+        qEl.value = state.q;
+        animeEl.value = state.anime;
+        sortEl.value = state.sort;
+
+        function syncUrl() {
+            try {
+                const u = new URL(window.location.href);
+                const set = (k, v, def) => (v && v !== def ? u.searchParams.set(k, v) : u.searchParams.delete(k));
+                set('q', state.q.trim(), '');
+                set('d', state.d, 'all');
+                set('anime', state.anime, 'all');
+                set('sort', state.sort, 'new');
+                window.history.replaceState(null, '', u);
+            } catch (err) { /* file:// gibi durumlarda sessizce geç */ }
+        }
+
+        function render() {
+            const q = state.q.trim().toLowerCase();
+            const list = PAPERCRAFTS.filter((p) =>
+                (state.d === 'all' || p.difficulty === state.d) &&
+                (state.anime === 'all' || p.anime === state.anime) &&
+                (!q || (p.name + ' ' + p.anime).toLowerCase().includes(q))
+            );
+
+            list.sort((a, b) => {
+                if (state.sort === 'az') return a.name.localeCompare(b.name);
+                if (state.sort === 'easy') return DIFFICULTY[a.difficulty].level - DIFFICULTY[b.difficulty].level || a.name.localeCompare(b.name);
+                if (state.sort === 'hard') return DIFFICULTY[b.difficulty].level - DIFFICULTY[a.difficulty].level || a.name.localeCompare(b.name);
+                return b.added.localeCompare(a.added) || a.name.localeCompare(b.name);
+            });
+
+            chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.d === state.d)));
+            countEl.textContent = plural(list.length, 'template') + ' found';
+
+            const none = list.length === 0;
+            grid.hidden = none;
+            emptyEl.hidden = !none;
+            if (!none) renderCards(grid, list);
+            syncUrl();
+        }
+
+        qEl.addEventListener('input', () => { state.q = qEl.value; render(); });
+        animeEl.addEventListener('change', () => { state.anime = animeEl.value; render(); });
+        sortEl.addEventListener('change', () => { state.sort = sortEl.value; render(); });
+        chips.forEach((c) => c.addEventListener('click', () => { state.d = c.dataset.d; render(); }));
+        resetBtn.addEventListener('click', () => {
+            state.q = ''; state.d = 'all'; state.anime = 'all'; state.sort = 'new';
+            qEl.value = ''; animeEl.value = 'all'; sortEl.value = 'new';
+            render();
+            qEl.focus();
+        });
+
+        render();
     }
-});
 
-document.addEventListener('click', function() {
-    // Remove keyboard focus indicator on mouse click
-    document.body.classList.remove('keyboard-focused');
-});
+    /* ---------- Detail ---------- */
+    function initDetail() {
+        const slug = new URLSearchParams(window.location.search).get('p');
+        const p = slug ? findBySlug(slug) : null;
+        const content = $('#content');
+        const notFound = $('#notfound');
+
+        if (!p) {
+            content.hidden = true;
+            notFound.hidden = false;
+            document.title = 'Template not found - ' + SITE.name;
+            return;
+        }
+
+        const d = DIFFICULTY[p.difficulty] || DIFFICULTY.medium;
+        document.title = p.name + ' papercraft template - ' + SITE.name;
+        const meta = $('meta[name="description"]');
+        if (meta) meta.setAttribute('content', 'Download the free ' + p.name + ' (' + p.anime + ') papercraft template. Difficulty: ' + d.label + '.');
+
+        $('#crumbName').textContent = p.name;
+        $('#dAnime').textContent = p.anime;
+        $('#dTitle').textContent = p.name;
+        $('#dDesc').textContent = p.description;
+        $('#fChar').textContent = p.name;
+        $('#fSeries').textContent = p.anime;
+        $('#fDiff').innerHTML = difficultyBadge(p.difficulty);
+
+        const art = $('#dArt');
+        art.innerHTML = artHTML(p);
+        hydrateArt(art);
+
+        const dl = $('#dDownload');
+        if (p.pdf) {
+            dl.innerHTML =
+                '<a class="btn btn--primary btn--lg btn--block" href="' + esc(p.pdf) + '" download>Download PDF</a>' +
+                '<p class="download-note">Free for personal use. Print at 100% scale on A4.</p>';
+        } else {
+            dl.innerHTML =
+                '<span class="btn btn--disabled btn--lg btn--block" aria-disabled="true">PDF coming soon</span>' +
+                '<p class="download-note">This template is being prepared. Check back soon.</p>';
+        }
+
+        /* Related: önce aynı anime, sonra diğerleri */
+        const others = PAPERCRAFTS.filter((x) => x.slug !== p.slug);
+        const related = others.filter((x) => x.anime === p.anime)
+            .concat(others.filter((x) => x.anime !== p.anime))
+            .slice(0, 3);
+        renderCards($('#relatedGrid'), related);
+    }
+
+    /* ---------- Boot ---------- */
+    function boot() {
+        renderHeader();
+        renderFooter();
+        const page = document.body.dataset.page;
+        if (page === 'home') initHome();
+        else if (page === 'list') initList();
+        else if (page === 'detail') initDetail();
+
+        $$('[data-link="github"]').forEach((a) => { if (SITE.github) a.href = SITE.github; else a.hidden = true; });
+        $$('[data-link="issues"]').forEach((a) => { if (SITE.github) a.href = SITE.github + '/issues'; else a.hidden = true; });
+    }
+
+    if (document.readyState === '
