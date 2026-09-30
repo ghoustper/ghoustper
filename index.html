@@ -2,143 +2,124 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="GHOSTPER - Free anime papercraft templates for everyone. Download and build your favorite characters.">
-    <meta name="theme-color" content="#000000">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>GHOSTPER - Free Anime Papercraft Templates</title>
+    <meta name="description" content="Free anime papercraft templates. Download the PDF, print it, cut, fold and build your favorite characters.">
+    <meta name="theme-color" content="#000000">
+    <meta property="og:title" content="GHOSTPER - Free Anime Papercraft Templates">
+    <meta property="og:description" content="Download free anime papercraft templates and build your favorite characters.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="assets/logo.png" type="image/png">
 </head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <img src="assets/logo.png" alt="GHOSTPER Logo" class="logo-img">
-                <span>GHOSTPER</span>
-            </div>
-            
-            <div class="hamburger" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-            
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="index.html" class="nav-link active">Home</a></li>
-                <li><a href="papercrafts.html" class="nav-link">Papercrafts</a></li>
-                <li><a href="about.html" class="nav-link">About</a></li>
-            </ul>
-        </div>
-    </nav>
+<body data-page="home">
+    <a class="skip" href="#main">Skip to content</a>
+    <header id="site-header"></header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>BUILD YOUR FAVORITE<br>CHARACTERS.</h1>
-            <p>Free anime papercraft templates made for everyone.</p>
-            <a href="papercrafts.html" class="btn btn-primary">Explore Papercrafts</a>
-        </div>
-    </section>
-
-    <!-- Ad Space 1 -->
-    <div class="ad-space" id="ad-banner">
-        <!-- Ad Banner will be placed here -->
-    </div>
-
-    <!-- Featured Papercrafts Section -->
-    <section class="featured">
-        <div class="container">
-            <h2>Featured Papercrafts</h2>
-            <p class="section-subtitle">Start with our most popular designs</p>
-            
-            <div class="papercrafts-grid" id="featuredGrid">
-                <!-- Cards will be populated by JavaScript -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <h2>Why Choose GHOSTPER?</h2>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📥</div>
-                    <h3>100% Free</h3>
-                    <p>All templates are completely free to download and use.</p>
+    <main id="main">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="wrap hero__grid">
+                <div>
+                    <h1 class="hero__title">Build your favorite anime characters.</h1>
+                    <p class="hero__lead">Free papercraft templates. Download the PDF, print it, cut, fold and glue. No sign-up needed.</p>
+                    <div class="hero__actions">
+                        <a class="btn btn--primary btn--lg" href="papercraft.html">Browse templates</a>
+                        <a class="btn btn--ghost btn--lg" href="#how">How it works</a>
+                    </div>
                 </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🎨</div>
-                    <h3>High Quality</h3>
-                    <p>Professional designs made with attention to detail.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Easy to Use</h3>
-                    <p>Simple step-by-step instructions included with each template.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">⚙️</div>
-                    <h3>All Levels</h3>
-                    <p>Templates for beginners, intermediate, and advanced builders.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Ad Space 2 -->
-    <div class="ad-space" id="ad-middle">
-        <!-- Ad Space -->
-    </div>
-
-    <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <h2>Ready to Start?</h2>
-            <p>Browse our complete collection of anime papercrafts.</p>
-            <a href="papercrafts.html" class="btn btn-primary">View All Templates</a>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>GHOSTPER</h4>
-                    <p>Free Anime Papercrafts</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Links</h4>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="papercrafts.html">Papercrafts</a></li>
-                        <li><a href="about.html">About</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Community</h4>
-                    <div class="social-links">
-                        <a href="#" title="GitHub" aria-label="GitHub">GitHub</a>
-                        <a href="#" title="Discord" aria-label="Discord">Discord</a>
-                        <a href="#" title="Twitter" aria-label="Twitter">Twitter</a>
+                <!-- Papercraft net: the outline draws itself once on load -->
+                <div class="net" aria-hidden="true">
+                    <svg class="net__svg" viewBox="24 16 152 196" xmlns="http://www.w3.org/2000/svg">
+                        <path class="net__cut" pathLength="1" d="M80 30H120V70H160V110H120V190H80V110H40V70H80Z"/>
+                        <path class="net__tab" d="M80 34L70 40V60L80 66"/>
+                        <path class="net__tab" d="M120 34L130 40V60L120 66"/>
+                        <path class="net__tab" d="M124 70L130 62H150L156 70"/>
+                        <path class="net__tab" d="M124 110L130 118H150L156 110"/>
+                        <path class="net__tab" d="M44 70L50 62H70L76 70"/>
+                        <path class="net__tab" d="M44 110L50 118H70L76 110"/>
+                        <path class="net__tab" d="M84 190L90 200H110L116 190"/>
+                        <path class="net__fold" d="M80 70H120M80 110H120M80 150H120M80 70V110M120 70V110"/>
+                    </svg>
+                    <div class="net__legend">
+                        <span><i></i>Cut</span>
+                        <span><i class="is-dash"></i>Fold</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2024 GHOSTPER. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+        </section>
 
+        <!-- Ad: home banner. Buraya reklam kodunu yapıştır. -->
+        <div class="wrap ad-wrap">
+            <aside class="ad" id="ad-home" aria-label="Advertisement">
+                <span>Advertisement</span>
+                <!-- AD CODE HERE -->
+            </aside>
+        </div>
+
+        <!-- Featured -->
+        <section class="section" aria-labelledby="featured-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <div>
+                        <h2 class="section__title" id="featured-title">Featured templates</h2>
+                        <p class="section__sub">Popular characters to start with.</p>
+                    </div>
+                    <a class="link-more" href="papercraft.html">View all templates</a>
+                </div>
+                <div class="grid" id="featuredGrid"></div>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="section section--line" id="how" aria-labelledby="how-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <div>
+                        <h2 class="section__title" id="how-title">From screen to shelf in four steps</h2>
+                        <p class="section__sub">All you need is a printer, paper, scissors and glue.</p>
+                    </div>
+                </div>
+                <ol class="steps">
+                    <li>
+                        <h3>Pick a template</h3>
+                        <p>Choose a character and open its page. The difficulty is shown on every card.</p>
+                    </li>
+                    <li>
+                        <h3>Print it</h3>
+                        <p>Print at 100% scale on A4. Cardstock between 160 and 220 gsm holds its shape best.</p>
+                    </li>
+                    <li>
+                        <h3>Cut and fold</h3>
+                        <p>Cut along the solid lines and fold along the dashed ones. Scoring with a ruler gives crisp edges.</p>
+                    </li>
+                    <li>
+                        <h3>Glue and display</h3>
+                        <p>Match the tabs and glue piece by piece. Start with the head, then move to the body.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="section section--line" id="categories" aria-labelledby="cat-title">
+            <div class="wrap">
+                <div class="section__head">
+                    <div>
+                        <h2 class="section__title" id="cat-title">Browse by series</h2>
+                        <p class="section__sub">Jump straight to your favorite anime.</p>
+                    </div>
+                </div>
+                <div class="cats" id="catGrid"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer id="site-footer"></footer>
     <script src="script.js"></script>
 </body>
 </html>
