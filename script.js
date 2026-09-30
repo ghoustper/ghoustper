@@ -1,8 +1,9 @@
 /* ==========================================================
-   GHOSTPER - script.js
-   1) SITE      : site ayarları (linkler, isim)
+   GHOSTPER v2 - script.js
+   1) SITE       : site ayarları (linkler, isim)
    2) PAPERCRAFTS: şablon listesi (yeni şablon buraya eklenir)
-   3) Geri kalanı: sayfaları çizen kod (dokunmana gerek yok)
+   3) PDF        : indirme sistemi (dokunmana gerek yok)
+   4) Geri kalanı: sayfaları çizen kod (dokunmana gerek yok)
    ========================================================== */
 
 /* ----------------------------------------------------------
@@ -12,22 +13,25 @@
 const SITE = {
     name: 'GHOSTPER',
     tagline: 'Free anime papercraft templates. Download, print, cut, fold and build.',
-    github: 'https://github.com/ghoustper/ghoustper',
-    discord: '',
-    instagram: '',
-    youtube: ''
+    discord: 'https://discord.gg/vYdAUbtXw',
+    instagram: 'https://www.instagram.com/ghoustper',
+    youtube: '',
+    github: ''
 };
 
 /* ----------------------------------------------------------
    2) PAPERCRAFT LİSTESİ
 
    Yeni şablon eklemek için bir blok kopyala ve doldur:
-     slug        : benzersiz, küçük harf, boşluk yerine tire (URL'de kullanılır)
+     slug        : benzersiz, küçük harf, boşluk yerine tire
      difficulty  : 'easy' | 'medium' | 'hard'
      added       : eklenme tarihi (YYYY-MM-DD), "Newest" sıralaması için
      featured    : true olursa ana sayfada görünür
-     pdf         : PDF dosya adı (repo ana klasöründe). Yoksa '' bırak -> "PDF coming soon" görünür
-     image       : önizleme görseli dosya adı (ör. 'madara.jpg'). Yoksa '' bırak -> otomatik çizim görünür
+     file        : indirilecek dosyanın adı (repo ana klasöründe).
+                   PDF olabilir. PNG, JPG veya SVG de olabilir:
+                   site onu otomatik olarak gerçek bir A4 PDF'e çevirip indirtir.
+                   Dosya yoksa '' bırak -> "PDF coming soon" görünür.
+     image       : kart önizleme görseli (ör. 'madara.jpg'). Yoksa '' bırak.
    ---------------------------------------------------------- */
 const PAPERCRAFTS = [
     {
@@ -38,7 +42,7 @@ const PAPERCRAFTS = [
         added: '2026-09-30',
         featured: true,
         description: 'The legendary Uchiha clan leader with his spiky black hair and stern Sharingan stare. A detailed build for experienced folders.',
-        pdf: 'madara-build-guide.pdf',
+        file: 'madara-build-guide.pdf',
         image: ''
     },
     {
@@ -49,7 +53,7 @@ const PAPERCRAFTS = [
         added: '2026-09-28',
         featured: true,
         description: 'The cheerful ninja with his orange jumpsuit and forehead protector. A fun mid-level build with bold colors.',
-        pdf: '',
+        file: '',
         image: ''
     },
     {
@@ -60,7 +64,7 @@ const PAPERCRAFTS = [
         added: '2026-09-28',
         featured: false,
         description: 'The talented ninja with the Sharingan. Fine facial details make this a challenge worth the effort.',
-        pdf: '',
+        file: '',
         image: ''
     },
     {
@@ -71,7 +75,7 @@ const PAPERCRAFTS = [
         added: '2026-09-28',
         featured: false,
         description: 'The Soul Reaper with bright orange hair and a black shihakusho. Great for intermediate builders.',
-        pdf: '',
+        file: '',
         image: ''
     },
     {
@@ -82,7 +86,7 @@ const PAPERCRAFTS = [
         added: '2026-09-28',
         featured: true,
         description: 'The legendary Saiyan warrior. Simple shapes and an iconic look make this a perfect first project.',
-        pdf: '',
+        file: '',
         image: ''
     },
     {
@@ -93,7 +97,7 @@ const PAPERCRAFTS = [
         added: '2026-09-28',
         featured: true,
         description: 'The strongest sorcerer with white hair and a blindfold. A complex design for advanced builders.',
-        pdf: '',
+        file: '',
         image: ''
     },
     {
@@ -104,7 +108,7 @@ const PAPERCRAFTS = [
         added: '2026-09-28',
         featured: false,
         description: 'The rubber-bodied pirate captain and his signature straw hat. Recognizable and rewarding at any skill level.',
-        pdf: '',
+        file: '',
         image: ''
     },
     {
@@ -115,7 +119,7 @@ const PAPERCRAFTS = [
         added: '2026-09-28',
         featured: false,
         description: 'The demon slayer in his green and black checkered haori. Beginner friendly with striking patterns.',
-        pdf: '',
+        file: '',
         image: ''
     },
     {
@@ -126,60 +130,257 @@ const PAPERCRAFTS = [
         added: '2026-09-28',
         featured: false,
         description: 'The hero who wins with one punch. Minimal details and clean shapes, ideal for beginners.',
-        pdf: '',
+        file: '',
         image: ''
     }
 ];
 
 /* ==========================================================
-   3) KOD (buradan aşağısını değiştirmene gerek yok)
+   3) PDF SİSTEMİ
+   - Dosya gerçek PDF ise: olduğu gibi indirilir.
+   - Dosya PNG / JPG / SVG ise (uzantısı .pdf olsa bile):
+     tarayıcıda A4 PDF'e çevrilip indirilir.
+   ========================================================== */
+/* PDF-START */
+function gpSniff(bytes) {
+    const n = Math.min(bytes.length, 4096);
+    let head = '';
+    for (let i = 0; i < n; i++) head += String.fromCharCode(bytes[i]);
+    if (head.indexOf('%PDF-') !== -1) return 'pdf';
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return 'png';
+    if (bytes[0] === 0xff && bytes[1] === 0xd8) return 'jpeg';
+    if (head.toLowerCase().indexOf('<svg') !== -1) return 'svg';
+    return 'unknown';
+}
+
+function gpSvgSize(txt) {
+    const tag = (txt.match(/<svg[^>]*>/i) || [''])[0];
+    const num = '([\\d.\\-eE]+)';
+    const vb = tag.match(new RegExp('viewBox\\s*=\\s*["\']\\s*' + num + '[\\s,]+' + num + '[\\s,]+' + num + '[\\s,]+' + num, 'i'));
+    if (vb && +vb[3] > 0 && +vb[4] > 0) return { w: +vb[3], h: +vb[4] };
+    const w = tag.match(/\swidth\s*=\s*["']([\d.]+)/i);
+    const h = tag.match(/\sheight\s*=\s*["']([\d.]+)/i);
+    if (w && h && +w[1] > 0 && +h[1] > 0) return { w: +w[1], h: +h[1] };
+    return null;
+}
+
+/* Tek sayfalık A4 PDF üretir. Görsel sayfaya ortalanır (10 mm kenar boşluğu). */
+function gpBuildPdf(jpeg, imgW, imgH) {
+    const landscape = imgW > imgH;
+    const pw = landscape ? 841.89 : 595.28;
+    const ph = landscape ? 595.28 : 841.89;
+    const margin = 28.35;
+    const s = Math.min((pw - 2 * margin) / imgW, (ph - 2 * margin) / imgH);
+    const w = imgW * s, h = imgH * s;
+    const x = (pw - w) / 2, y = (ph - h) / 2;
+
+    const enc = new TextEncoder();
+    const chunks = [];
+    const offsets = [];
+    let len = 0;
+    const push = (d) => {
+        const b = typeof d === 'string' ? enc.encode(d) : d;
+        chunks.push(b);
+        len += b.length;
+    };
+
+    push('%PDF-1.4\n');
+    offsets[1] = len; push('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+    offsets[2] = len; push('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
+    offsets[3] = len;
+    push('3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pw.toFixed(2) + ' ' + ph.toFixed(2) + '] ' +
+         '/Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>\nendobj\n');
+    offsets[4] = len;
+    push('4 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + imgW + ' /Height ' + imgH +
+         ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpeg.length + ' >>\nstream\n');
+    push(jpeg);
+    push('\nendstream\nendobj\n');
+    const content = 'q ' + w.toFixed(2) + ' 0 0 ' + h.toFixed(2) + ' ' + x.toFixed(2) + ' ' + y.toFixed(2) + ' cm /Im0 Do Q';
+    offsets[5] = len;
+    push('5 0 obj\n<< /Length ' + content.length + ' >>\nstream\n' + content + '\nendstream\nendobj\n');
+
+    const xrefPos = len;
+    let xref = 'xref\n0 6\n0000000000 65535 f \n';
+    for (let i = 1; i <= 5; i++) xref += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+    push(xref + 'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n' + xrefPos + '\n%%EOF');
+
+    return new Blob(chunks, { type: 'application/pdf' });
+}
+
+/* PNG / JPG / SVG baytlarını A4 PDF'e çevirir (sadece tarayıcıda çalışır). */
+async function gpImageToPdf(bytes, kind) {
+    const mime = kind === 'svg' ? 'image/svg+xml' : kind === 'png' ? 'image/png' : 'image/jpeg';
+    let svgSize = null;
+    if (kind === 'svg') svgSize = gpSvgSize(new TextDecoder().decode(bytes.subarray(0, 8192)));
+
+    const url = URL.createObjectURL(new Blob([bytes], { type: mime }));
+    try {
+        const img = await new Promise((resolve, reject) => {
+            const im = new Image();
+            im.onload = () => resolve(im);
+            im.onerror = () => reject(new Error('Image could not be decoded'));
+            im.src = url;
+        });
+
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (svgSize) { w = svgSize.w; h = svgSize.h; }
+        if (!w || !h) { w = 1240; h = 1754; }
+
+        /* SVG vektördür: uzun kenarı 3000 px olacak şekilde ölçekle. Görsel: en fazla 3508 px. */
+        const scale = kind === 'svg' ? 3000 / Math.max(w, h) : Math.min(1, 3508 / Math.max(w, h));
+        const cw = Math.max(1, Math.round(w * scale));
+        const ch = Math.max(1, Math.round(h * scale));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = cw;
+        canvas.height = ch;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, cw, ch);
+        ctx.drawImage(img, 0, 0, cw, ch);
+
+        const jpegBlob = await new Promise((resolve, reject) => {
+            canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Canvas export failed'))), 'image/jpeg', 0.92);
+        });
+        const jpeg = new Uint8Array(await jpegBlob.arrayBuffer());
+        return gpBuildPdf(jpeg, cw, ch);
+    } finally {
+        URL.revokeObjectURL(url);
+    }
+}
+
+/* Dosyayı indirir, türünü tanır ve indirilebilir bir PDF Blob'u döndürür. */
+async function gpFileToPdfBlob(url) {
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('File not found (HTTP ' + res.status + ')');
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    const kind = gpSniff(bytes);
+    if (kind === 'pdf') return new Blob([bytes], { type: 'application/pdf' });
+    if (kind === 'png' || kind === 'jpeg' || kind === 'svg') return gpImageToPdf(bytes, kind);
+    throw new Error('Unsupported file type');
+}
+/* PDF-END */
+
+/* ==========================================================
+   4) SAYFA KODU (buradan aşağısını değiştirmene gerek yok)
    ========================================================== */
 (function () {
     'use strict';
 
-    /* ---------- Helpers ---------- */
     const $ = (sel, root) => (root || document).querySelector(sel);
     const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+    const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ESC[c]);
+    const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
 
     const DIFFICULTY = {
-        easy: { label: 'Easy', level: 1 },
-        medium: { label: 'Medium', level: 2 },
-        hard: { label: 'Hard', level: 3 }
+        easy: { label: 'Easy', level: 1, time: 'About 1 hour' },
+        medium: { label: 'Medium', level: 2, time: 'About 2-3 hours' },
+        hard: { label: 'Hard', level: 3, time: 'About 4-6 hours' }
+    };
+
+    const ICON = {
+        heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>',
+        download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>',
+        discord: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11h-9l-4 4v-4H4z"/></svg>',
+        instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" stroke="none"/></svg>',
+        youtube: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z"/></svg>',
+        github: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4 1.5-4-2-6-2m12 4v-3.5a3 3 0 0 0-.8-2.3c2.7-.3 5.5-1.3 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.3 4.3 0 0 0-.1-3.2s-1-.3-3.3 1.2a11.400 11.400 0 0 0-6 0C6.700 2.900 5.700 3.200 5.700 3.200a4.300 4.300 0 0 0-.1 3.200A4.600 4.600 0 0 0 4.300 9.600c0 4.600 2.800 5.700 5.500 6A3 3 0 0 0 9 17.900V21"/></svg>'
     };
 
     const findBySlug = (slug) => PAPERCRAFTS.find((p) => p.slug === slug);
-    const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
 
+    /* ---------- Stil dosyası koruması ----------
+       style.css yüklenmediyse (ör. dosya adı style.ccs kaldıysa) içeriği
+       kendisi bulup sayfaya ekler. Böylece site yine siyah ve animasyonlu açılır. */
+    let cssRescued = false;
+    async function ensureStyles() {
+        if (cssRescued) return;
+        const loaded = getComputedStyle(document.documentElement).getPropertyValue('--ghostper').trim();
+        if (loaded) return;
+        cssRescued = true;
+        const names = ['style.css', 'style.ccs'];
+        for (const name of names) {
+            try {
+                const res = await fetch(name, { cache: 'no-cache' });
+                if (!res.ok) continue;
+                const text = await res.text();
+                if (text.indexOf('GHOSTPER v2') === -1) continue;
+                const tag = document.createElement('style');
+                tag.textContent = text;
+                document.head.appendChild(tag);
+                return;
+            } catch (err) { /* sıradaki adı dene */ }
+        }
+        console.warn('GHOSTPER: style.css bulunamadı. Repoda "style.css" adlı bir dosya olduğundan emin ol.');
+    }
+
+    /* ---------- Favoriler (tarayıcıda saklanır) ---------- */
+    const FAV_KEY = 'ghostper:saved';
+    let favMemory = null;
+    const Fav = {
+        list() {
+            if (favMemory) return favMemory;
+            try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); } catch (e) { return []; }
+        },
+        save(list) {
+            favMemory = list;
+            try { localStorage.setItem(FAV_KEY, JSON.stringify(list)); } catch (e) { /* özel gezinme */ }
+        },
+        has(slug) { return this.list().indexOf(slug) !== -1; },
+        toggle(slug) {
+            const list = this.list().slice();
+            const i = list.indexOf(slug);
+            if (i === -1) list.push(slug); else list.splice(i, 1);
+            this.save(list);
+            return i === -1;
+        }
+    };
+
+    /* ---------- Bildirim (toast) ---------- */
+    let toastTimer;
+    function toast(msg) {
+        let el = $('#toast');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'toast';
+            el.className = 'toast';
+            el.setAttribute('role', 'status');
+            document.body.appendChild(el);
+        }
+        el.textContent = msg;
+        el.hidden = false;
+        el.style.animation = 'none';
+        void el.offsetWidth;
+        el.style.animation = '';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { el.hidden = true; }, 3200);
+    }
+
+    /* ---------- Yardımcılar ---------- */
     function hashHue(str) {
         let h = 0;
         for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
         return h % 360;
     }
-
     function initials(name) {
-        return name
-            .split(/\s+/)
-            .filter(Boolean)
-            .slice(0, 2)
-            .map((w) => w[0].toUpperCase())
-            .join('');
+        return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+    }
+    function htmlToNode(html) {
+        const t = document.createElement('template');
+        t.innerHTML = html.trim();
+        return t.content.firstChild;
     }
 
-    /* ---------- Reusable pieces ---------- */
     function difficultyBadge(key) {
         const d = DIFFICULTY[key] || DIFFICULTY.medium;
         const bars = [1, 2, 3].map((n) => '<i class="' + (n <= d.level ? 'on' : '') + '"></i>').join('');
-        return (
-            '<span class="diff diff--' + esc(key) + '">' +
-            '<span class="diff__bars" aria-hidden="true">' + bars + '</span>' +
-            '<span>' + d.label + '</span></span>'
-        );
+        return '<span class="diff diff--' + esc(key) + '"><span class="diff__bars" aria-hidden="true">' + bars + '</span><span>' + d.label + '</span></span>';
     }
 
-    /* Otomatik çizilen önizleme: küçük bir kutu açılımı (papercraft net) */
+    /* Otomatik önizleme: papercraft açılımı çizimi */
     function placeholderSVG(p) {
         const color = 'hsl(' + hashHue(p.anime) + ' 60% 74%)';
         return (
@@ -192,13 +393,10 @@ const PAPERCRAFTS = [
     }
 
     function artHTML(p) {
-        if (p.image) {
-            return '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + ' papercraft preview" loading="lazy" data-slug="' + esc(p.slug) + '">';
-        }
+        if (p.image) return '<img src="' + esc(p.image) + '" alt="' + esc(p.name) + ' papercraft preview" loading="lazy" data-slug="' + esc(p.slug) + '">';
         return placeholderSVG(p);
     }
 
-    /* Görsel yüklenmezse otomatik çizime dön */
     function hydrateArt(root) {
         $$('img[data-slug]', root).forEach((img) => {
             img.addEventListener('error', () => {
@@ -208,275 +406,44 @@ const PAPERCRAFTS = [
         });
     }
 
-    function htmlToNode(html) {
-        const t = document.createElement('template');
-        t.innerHTML = html.trim();
-        return t.content.firstChild;
-    }
-
-    function cardHTML(p) {
+    function cardHTML(p, i, mode) {
+        const saved = Fav.has(p.slug);
+        const attrs = mode === 'enter'
+            ? ' class="card card--enter" style="--i:' + i + '"'
+            : ' class="card" data-reveal style="--rd:' + (i % 4) * 80 + 'ms"';
         return (
-            '<a class="card" href="detail.html?p=' + encodeURIComponent(p.slug) + '">' +
-            '<div class="card__art">' + artHTML(p) +
-            (p.pdf ? '' : '<span class="card__tag">PDF soon</span>') +
-            '</div>' +
+            '<article' + attrs + '>' +
+            '<div class="card__art">' + artHTML(p) + (p.file ? '' : '<span class="card__tag">PDF soon</span>') + '</div>' +
+            '<button class="fav" type="button" data-fav="' + esc(p.slug) + '" aria-pressed="' + saved + '" aria-label="Save ' + esc(p.name) + ' to favorites">' + ICON.heart + '</button>' +
             '<div class="card__body">' +
             '<p class="card__anime">' + esc(p.anime) + '</p>' +
-            '<h3 class="card__title">' + esc(p.name) + '</h3>' +
+            '<h3 class="card__title"><a class="card__link" href="detail.html?p=' + encodeURIComponent(p.slug) + '">' + esc(p.name) + '</a></h3>' +
             '<div class="card__foot">' + difficultyBadge(p.difficulty) + '<span class="card__cta">View template</span></div>' +
-            '</div></a>'
+            '</div></article>'
         );
     }
 
-    function renderCards(container, list) {
-        container.innerHTML = list.map(cardHTML).join('');
+    function renderCards(container, list, mode) {
+        container.innerHTML = list.map((p, i) => cardHTML(p, i, mode)).join('');
         hydrateArt(container);
+        if (mode !== 'enter') initReveal(container);
     }
 
-    /* ---------- Header & Footer ---------- */
-    function renderHeader() {
-        const host = $('#site-header');
-        if (!host) return;
-        const page = document.body.dataset.page;
-        const cur = (name) => (page === name ? ' aria-current="page"' : '');
-
-        host.className = 'site-header';
-        host.innerHTML =
-            '<div class="wrap header__in">' +
-            '<a class="brand" href="index.html" aria-label="' + esc(SITE.name) + ' home">' +
-            '<img class="brand__logo" src="logo.png" alt="" width="36" height="36">' +
-            '<span>' + esc(SITE.name) + '</span></a>' +
-            '<button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu"><span></span><span></span></button>' +
-            '<nav class="nav" id="site-nav" aria-label="Main">' +
-            '<a href="index.html"' + cur('home') + '>Home</a>' +
-            '<a href="papercraft.html"' + cur('list') + '>Papercrafts</a>' +
-            '<a href="index.html#categories">Categories</a>' +
-            '<a href="about.html"' + cur('about') + '>About</a>' +
-            '</nav></div>';
-
-        const logo = $('.brand__logo', host);
-        logo.addEventListener('error', () => logo.remove(), { once: true });
-
-        const btn = $('.menu-btn', host);
-        const nav = $('#site-nav', host);
-        const setOpen = (open) => {
-            btn.setAttribute('aria-expanded', String(open));
-            btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-            nav.dataset.open = String(open);
-        };
-        btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
-        $$('a', nav).forEach((a) => a.addEventListener('click', () => setOpen(false)));
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
-        document.addEventListener('click', (e) => { if (!host.contains(e.target)) setOpen(false); });
+    /* ---------- Kaydırma animasyonları ---------- */
+    let io = null;
+    function countUp(el) {
+        const target = parseFloat(el.dataset.count) || 0;
+        const suffix = el.dataset.suffix || '';
+        if (REDUCED) { el.textContent = target + suffix; return; }
+        const t0 = performance.now();
+        (function tick(t) {
+            const p = Math.min(1, (t - t0) / 1400);
+            el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+            if (p < 1) requestAnimationFrame(tick);
+        })(t0);
     }
 
-    function renderFooter() {
-        const host = $('#site-footer');
-        if (!host) return;
-
-        const social = [];
-        if (SITE.github) social.push(['GitHub', SITE.github]);
-        if (SITE.discord) social.push(['Discord', SITE.discord]);
-        if (SITE.instagram) social.push(['Instagram', SITE.instagram]);
-        if (SITE.youtube) social.push(['YouTube', SITE.youtube]);
-        const socialHTML = social
-            .map((s) => '<li><a href="' + esc(s[1]) + '" target="_blank" rel="noopener noreferrer">' + s[0] + '</a></li>')
-            .join('');
-
-        host.className = 'site-footer';
-        host.innerHTML =
-            '<div class="wrap">' +
-            '<div class="footer__grid">' +
-            '<div class="footer__brand"><a class="brand" href="index.html">' +
-            '<img class="brand__logo" src="logo.png" alt="" width="36" height="36"><span>' + esc(SITE.name) + '</span></a>' +
-            '<p>' + esc(SITE.tagline) + '</p></div>' +
-            '<div class="footer__col"><h4>Explore</h4><ul>' +
-            '<li><a href="index.html">Home</a></li>' +
-            '<li><a href="papercraft.html">Papercrafts</a></li>' +
-            '<li><a href="index.html#categories">Categories</a></li>' +
-            '<li><a href="about.html">About</a></li></ul></div>' +
-            (socialHTML ? '<div class="footer__col"><h4>Community</h4><ul>' + socialHTML + '</ul></div>' : '') +
-            '</div>' +
-            '<div class="footer__bottom">' +
-            '<span>&copy; ' + new Date().getFullYear() + ' ' + esc(SITE.name) + '</span>' +
-            '<span>Fan-made templates. All characters belong to their respective owners.</span>' +
-            '</div></div>';
-
-        const logo = $('.brand__logo', host);
-        if (logo) logo.addEventListener('error', () => logo.remove(), { once: true });
-    }
-
-    /* ---------- Home ---------- */
-    function initHome() {
-        const featured = $('#featuredGrid');
-        if (featured) {
-            const list = PAPERCRAFTS.filter((p) => p.featured).slice(0, 4);
-            renderCards(featured, list.length ? list : PAPERCRAFTS.slice(0, 4));
-        }
-
-        const cats = $('#catGrid');
-        if (cats) {
-            const counts = {};
-            PAPERCRAFTS.forEach((p) => { counts[p.anime] = (counts[p.anime] || 0) + 1; });
-            cats.innerHTML = Object.keys(counts)
-                .sort((a, b) => a.localeCompare(b))
-                .map((name) =>
-                    '<a class="cat" href="papercraft.html?anime=' + encodeURIComponent(name) + '">' +
-                    '<strong>' + esc(name) + '</strong><span>' + plural(counts[name], 'template') + '</span></a>'
-                )
-                .join('');
-        }
-    }
-
-    /* ---------- Papercraft list ---------- */
-    function initList() {
-        const grid = $('#grid');
-        if (!grid) return;
-
-        const qEl = $('#q');
-        const animeEl = $('#anime');
-        const sortEl = $('#sort');
-        const chips = $$('#diffChips .chip');
-        const countEl = $('#count');
-        const emptyEl = $('#empty');
-        const resetBtn = $('#reset');
-
-        /* Anime seçeneklerini doldur */
-        Array.from(new Set(PAPERCRAFTS.map((p) => p.anime)))
-            .sort((a, b) => a.localeCompare(b))
-            .forEach((name) => {
-                const o = document.createElement('option');
-                o.value = name;
-                o.textContent = name;
-                animeEl.appendChild(o);
-            });
-
-        /* URL'den başlangıç durumu */
-        const params = new URLSearchParams(window.location.search);
-        const state = {
-            q: params.get('q') || '',
-            d: DIFFICULTY[params.get('d')] ? params.get('d') : 'all',
-            anime: params.get('anime') || 'all',
-            sort: ['new', 'az', 'easy', 'hard'].includes(params.get('sort')) ? params.get('sort') : 'new'
-        };
-        if (state.anime !== 'all' && !PAPERCRAFTS.some((p) => p.anime === state.anime)) state.anime = 'all';
-
-        qEl.value = state.q;
-        animeEl.value = state.anime;
-        sortEl.value = state.sort;
-
-        function syncUrl() {
-            try {
-                const u = new URL(window.location.href);
-                const set = (k, v, def) => (v && v !== def ? u.searchParams.set(k, v) : u.searchParams.delete(k));
-                set('q', state.q.trim(), '');
-                set('d', state.d, 'all');
-                set('anime', state.anime, 'all');
-                set('sort', state.sort, 'new');
-                window.history.replaceState(null, '', u);
-            } catch (err) { /* file:// gibi durumlarda sessizce geç */ }
-        }
-
-        function render() {
-            const q = state.q.trim().toLowerCase();
-            const list = PAPERCRAFTS.filter((p) =>
-                (state.d === 'all' || p.difficulty === state.d) &&
-                (state.anime === 'all' || p.anime === state.anime) &&
-                (!q || (p.name + ' ' + p.anime).toLowerCase().includes(q))
-            );
-
-            list.sort((a, b) => {
-                if (state.sort === 'az') return a.name.localeCompare(b.name);
-                if (state.sort === 'easy') return DIFFICULTY[a.difficulty].level - DIFFICULTY[b.difficulty].level || a.name.localeCompare(b.name);
-                if (state.sort === 'hard') return DIFFICULTY[b.difficulty].level - DIFFICULTY[a.difficulty].level || a.name.localeCompare(b.name);
-                return b.added.localeCompare(a.added) || a.name.localeCompare(b.name);
-            });
-
-            chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.d === state.d)));
-            countEl.textContent = plural(list.length, 'template') + ' found';
-
-            const none = list.length === 0;
-            grid.hidden = none;
-            emptyEl.hidden = !none;
-            if (!none) renderCards(grid, list);
-            syncUrl();
-        }
-
-        qEl.addEventListener('input', () => { state.q = qEl.value; render(); });
-        animeEl.addEventListener('change', () => { state.anime = animeEl.value; render(); });
-        sortEl.addEventListener('change', () => { state.sort = sortEl.value; render(); });
-        chips.forEach((c) => c.addEventListener('click', () => { state.d = c.dataset.d; render(); }));
-        resetBtn.addEventListener('click', () => {
-            state.q = ''; state.d = 'all'; state.anime = 'all'; state.sort = 'new';
-            qEl.value = ''; animeEl.value = 'all'; sortEl.value = 'new';
-            render();
-            qEl.focus();
-        });
-
-        render();
-    }
-
-    /* ---------- Detail ---------- */
-    function initDetail() {
-        const slug = new URLSearchParams(window.location.search).get('p');
-        const p = slug ? findBySlug(slug) : null;
-        const content = $('#content');
-        const notFound = $('#notfound');
-
-        if (!p) {
-            content.hidden = true;
-            notFound.hidden = false;
-            document.title = 'Template not found - ' + SITE.name;
-            return;
-        }
-
-        const d = DIFFICULTY[p.difficulty] || DIFFICULTY.medium;
-        document.title = p.name + ' papercraft template - ' + SITE.name;
-        const meta = $('meta[name="description"]');
-        if (meta) meta.setAttribute('content', 'Download the free ' + p.name + ' (' + p.anime + ') papercraft template. Difficulty: ' + d.label + '.');
-
-        $('#crumbName').textContent = p.name;
-        $('#dAnime').textContent = p.anime;
-        $('#dTitle').textContent = p.name;
-        $('#dDesc').textContent = p.description;
-        $('#fChar').textContent = p.name;
-        $('#fSeries').textContent = p.anime;
-        $('#fDiff').innerHTML = difficultyBadge(p.difficulty);
-
-        const art = $('#dArt');
-        art.innerHTML = artHTML(p);
-        hydrateArt(art);
-
-        const dl = $('#dDownload');
-        if (p.pdf) {
-            dl.innerHTML =
-                '<a class="btn btn--primary btn--lg btn--block" href="' + esc(p.pdf) + '" download>Download PDF</a>' +
-                '<p class="download-note">Free for personal use. Print at 100% scale on A4.</p>';
-        } else {
-            dl.innerHTML =
-                '<span class="btn btn--disabled btn--lg btn--block" aria-disabled="true">PDF coming soon</span>' +
-                '<p class="download-note">This template is being prepared. Check back soon.</p>';
-        }
-
-        /* Related: önce aynı anime, sonra diğerleri */
-        const others = PAPERCRAFTS.filter((x) => x.slug !== p.slug);
-        const related = others.filter((x) => x.anime === p.anime)
-            .concat(others.filter((x) => x.anime !== p.anime))
-            .slice(0, 3);
-        renderCards($('#relatedGrid'), related);
-    }
-
-    /* ---------- Boot ---------- */
-    function boot() {
-        renderHeader();
-        renderFooter();
-        const page = document.body.dataset.page;
-        if (page === 'home') initHome();
-        else if (page === 'list') initList();
-        else if (page === 'detail') initDetail();
-
-        $$('[data-link="github"]').forEach((a) => { if (SITE.github) a.href = SITE.github; else a.hidden = true; });
-        $$('[data-link="issues"]').forEach((a) => { if (SITE.github) a.href = SITE.github + '/issues'; else a.hidden = true; });
-    }
-
-    if (document.readyState === '
+    function initReveal(root) {
+        const els = $$('[data-reveal]:not(.is-in), [data-count]:not([data-counted])', root || document);
+        const show = (el) => {
+            if (el.ha
