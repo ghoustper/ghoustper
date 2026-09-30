@@ -7,6 +7,8 @@
     <meta name="description" content="Browse all free anime papercraft templates. Search by character or series and filter by difficulty.">
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="logo.png" type="image/png">
+    <script>document.documentElement.classList.add('js')</script>
+    <style>html,body{background:#000;color:#f5f5f6;margin:0}</style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -19,8 +21,8 @@
     <main id="main">
         <section class="page-head">
             <div class="wrap">
-                <h1>Papercrafts</h1>
-                <p>Search by character or series, and pick a difficulty that fits your skills.</p>
+                <h1 class="rise">Papercrafts</h1>
+                <p class="rise" style="--rd:150ms">Search by character or series, and pick a difficulty that fits your skills. Press / to jump to search.</p>
             </div>
         </section>
 
@@ -52,6 +54,7 @@
                         <button class="chip" type="button" data-d="medium" aria-pressed="false">Medium</button>
                         <button class="chip" type="button" data-d="hard" aria-pressed="false">Hard</button>
                     </div>
+                    <button class="chip" type="button" id="savedChip" aria-pressed="false">Saved (0)</button>
                     <p class="result-count" id="count" role="status" aria-live="polite"></p>
                 </div>
             </div>
@@ -65,8 +68,8 @@
             <div class="grid" id="grid"></div>
 
             <div class="empty" id="empty" hidden>
-                <h2>No templates match your search</h2>
-                <p>Try a different name, or clear the filters to see everything.</p>
+                <h2>No templates to show</h2>
+                <p id="emptyText">Try a different name, or clear the filters to see everything.</p>
                 <button class="btn btn--primary" type="button" id="reset">Clear filters</button>
             </div>
         </div>
